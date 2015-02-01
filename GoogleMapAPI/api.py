@@ -1,6 +1,5 @@
 __author__ = 'basnal'
 from Actors.TimeKeeper import TimeKeeper
-from Actors.Path import Path
 import googlemaps
 import pprint
 
@@ -11,15 +10,29 @@ class GMap:
     MapService = googlemaps.Client(key='AIzaSyCb4y2S1BNpcTYtFjV9nd58N2E3etxe-O4')
     pp = pprint.PrettyPrinter(indent=2)
     time = TimeKeeper()
-    Rasta = Path()
 
     def addLocations(self, locA, locB):
         self.PickUp = locA
         self.DropOff = locB
 
-    def findRoute(self, bus):
-        self.PickUpGeocode = self.MapService.geocode(self.PickUp)
-        self.DropOffGeocode = self.MapService.geocode(self.DropOff)
+    def findRoute(self, origin, destination, mode):
+        self.directions = self.MapService.directions(origin, destination,
+                                                     mode=mode)
+
+        #print ">>>>>>>>>> Directions"
+        #self.pp.pprint(self.directions[0]['legs'][0])
+        return self.directions[0]['legs'][0]
+
+    def getGeocodeFor(self, location):
+        res = self.MapService.geocode(location)
+        self.pp.pprint(res[0]['formatted_address'])
+        self.pp.pprint(res[0]['geometry']['location'])
+
+        return [res[0]['geometry']['location']['lat'], res[0]['geometry']['location']['lng']]
+
+    def findRouteofBus(self, bus):
+        #self.PickUpGeocode = self.MapService.geocode(self.PickUp)
+        #self.DropOffGeocode = self.MapService.geocode(self.DropOff)
 
         #print self.PickUpGeocode[0]['geometry']['location']
 
@@ -27,12 +40,17 @@ class GMap:
         print bus.origin
         print bus.destination
         self.directions = self.MapService.directions(bus.origin, bus.destination,
-                                                     waypoints=self.getWaypoints(bus),
+                                                     waypoints=bus.route,
                                                      mode='driving',
                                                      optimize_waypoints=True)
 
         # for total time self.directions[0]['legs'][0]['duration']
 
+        self.pp.pprint(self.directions)
+
+        return self.directions
+
+        """
         self.time.formatToTime(self.TimeDistanceOfTravel(self.directions[0]['legs'])[0])
         self.time.printTime()
         #self.pp.pprint(self.directions[0]['legs'])
@@ -50,6 +68,7 @@ class GMap:
         return {'locations': {'origin': self.PickUpGeocode,
                               'destination': self.DropOffGeocode},
                 'bus': bus}
+        """
 
     def findRouteWithoutBus(self):
         if not self.PickUp or not self.DropOff:
@@ -69,42 +88,3 @@ class GMap:
         return {'locations': {'origin': self.PickUpGeocode,
                               'destination': self.DropOffGeocode},
                 'directions': self.directions}
-
-    def getWaypoints(self, bus):
-
-        if len(bus.route) > 0:
-            waypoints = bus.route
-            waypoints.append(self.PickUpGeocode[0]['geometry']['location'])
-            waypoints.append(self.DropOffGeocode[0]['geometry']['location'])
-            return waypoints
-
-        else:
-            return [self.PickUp, self.DropOff]
-
-    def TimeDistanceOfTravel(self, stops):
-        result = [0, 0]
-        for stop in stops:
-            result[0] = result[0] + stop['duration']['value']
-            result[1] = result[1] + stop['distance']['value']
-
-        return result
-
-    def drtAlgo(self, bus):
-        # Presently this algo only considers Tmax of the bus
-        if self.time.TotalMinutes > bus.Tmax:
-            Hubs = bus.route
-            Hubs.insert(0, bus.origin)
-            Hubs.append(bus.destination)
-            print 'if'
-        else:
-            print 'else'
-            Hubs = bus.route
-            Hubs.insert(0, bus.origin)
-            Hubs.append(self.PickUpGeocode[0]['geometry']['location'])
-            Hubs.append(self.DropOffGeocode[0]['geometry']['location'])
-            bus.route = Hubs
-            Hubs.append(bus.destination)
-            bus.Duration = self.directions[0]['legs'][0]['duration']['value'] / 60
-            bus.Distance = self.directions[0]['legs'][0]['distance']['value'] / 1000
-
-        return Hubs, bus

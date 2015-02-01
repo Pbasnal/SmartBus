@@ -2,17 +2,14 @@ __author__ = 'basnal'
 # This class app handles the buses during the processing of algorithm.
 
 #from Actors.models import BusModel
-from GoogleMapAPI.api import GMap
-from operator import attrgetter
 from Actors.Bus import Bus
-
 
 # Class Buses maintains the list of buses used during the processing
 class Buses:
     BusList = []
-    Gmap = GMap()
+    AcceptingBusList = []
 
-    def getBus(self, origin, destination):
+    def getBus(self, pickup, dropoff):
         # this function returns the most appropriate bus to pick up a customer
         # at origin and going to destination
 
@@ -22,20 +19,10 @@ class Buses:
         # for now we use only one bus
         self.BusList.append(Bus())
 
-        self.Gmap.addLocations(origin, destination)
-
-
-        TempBus = Bus()
         for bus in self.BusList:
-            TempResult = self.Gmap.findRoute(bus)
+            if bus.accept(pickup, dropoff):
+                self.AcceptingBusList.append(bus)
 
-            #print bus
-
-            if TempBus.Duration == 0 or TempBus.Duration < bus.Duration:
-                TempBus = bus
-                Result = TempResult
-
-        return Result
 
 
 
