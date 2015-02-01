@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Google Maps</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+	<script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>
+    <style>
+        #mapcanvas{
+            width: 800px;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+    {{ showonlymap }}
+     <div id="request">
+        <form action="/drt/setpath/" method="POST">{% csrf_token %}
+            <table>
+                <tr>
+                    <td>Origin</td>
+                    <td>Destination</td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="origin" /></td>
+                    <td><input type="text" name="destination" /></td>
+                </tr>
+                <tr>
+                    <td><input type="submit" name="destin" value="Get Route"/></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div id="mapcanvas">
+
+    </div>
+
+    <script>
+        $(document).ready(initialise);
+
+        var map;
+        var maponly = {{ showonlymap }};
+        var response = {};
+
+        function initialise()
+        {
+            console.log("initialise");
+            //navigator.geolocation.getCurrentPosition(initialise, onError, {timeout:10000});
+            var mapoptions = {
+                center: new google.maps.LatLng(18.5204303, 73.85674369999992),
+                zoom: 8,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+
+            map = new google.maps.Map(document.getElementById("mapcanvas"), mapoptions);
+
+            if(!maponly)
+            {
+                response = {{ response | safe}};
+                console.log(response);
+                //renderRoute();
+            }
+        }
+
+        function renderRoute()
+        {
+            console.log("place marker");
+
+            for(place in response['locations'])
+            {
+                placeMarker(response['locations'][place][0].geometry.location);
+            }
+
+            //for(i = 0; i < response['directions'][0]['legs'][0]['steps'].length; i++)
+            //{
+              //  placeMarker(response['directions'][0]['legs'][0]['steps'][i]['end_location']);
+            //}
+
+            dirserv = new google.maps.DirectionsService();
+            dirDisplay = new google.maps.DirectionsRenderer();
+            dirDisplay.setMap(map);
+
+            console.log(response['directions'][0]['legs'][0]['steps'][0]);
+
+            originLoc = new google.maps.LatLng( response['locations']['origin'][0]['geometry']['location']['lat'],
+                                                response['locations']['origin'][0]['geometry']['location']['lng']);
+            destinLoc = new google.maps.LatLng( response['locations']['destination'][0]['geometry']['location']['lat'],
+                                                response['locations']['destination'][0]['geometry']['location']['lng']);
+            var request = {
+                origin: originLoc,
+                destination: destinLoc,
+                durationInTraffic: true,
+                //waypoints: midpoints,
+                optimizeWaypoints: true,
+                travelMode: google.maps.TravelMode.DRIVING
+            };
+
+            dirserv.route(request, function(response, status)
+            {
+                if(status == google.maps.DirectionsStatus.OK)
+                {
+                    dirDisplay.setDirections(response);
+                }
+            });
+        }
+
+        function placeMarker(place)
+        {
+            console.log("placing marker");
+            var marker = new google.maps.Marker({
+                position: place,
+                map: map
+            });
+            console.log("Marker");
+        }
+    </script>
+</body>
+</html>
+
