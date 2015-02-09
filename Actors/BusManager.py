@@ -4,10 +4,14 @@ __author__ = 'basnal'
 #from Actors.models import BusModel
 from Actors.Bus import Bus
 
+import pprint
+
 # Class Buses maintains the list of buses used during the processing
 class Buses:
     BusList = []
     AcceptingBusList = []
+
+    pp = pprint.PrettyPrinter()
 
     def getBus(self, pickup, dropoff):
         # this function returns the most appropriate bus to pick up a customer
@@ -22,7 +26,14 @@ class Buses:
         for bus in self.BusList:
             if bus.accept(pickup, dropoff):
                 self.AcceptingBusList.append(bus)
+                break
 
+        self.AcceptingBusList[0].confirm()
+
+        print("\n\nSelected Bus >>\n")
+        self.pp.pprint(self.AcceptingBusList[0].route)
+
+        return self.AcceptingBusList[0]
 
 
 

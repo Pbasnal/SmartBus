@@ -46,7 +46,7 @@ class GMap:
 
         # for total time self.directions[0]['legs'][0]['duration']
 
-        self.pp.pprint(self.directions)
+        #self.pp.pprint(self.directions)
 
         return self.directions
 

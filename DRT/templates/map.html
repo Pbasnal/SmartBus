@@ -42,7 +42,7 @@
 
         var map;
         var maponly = {{ showonlymap }};
-        var response = {};
+        var bus = {};
 
         function initialise()
         {
@@ -58,41 +58,47 @@
 
             if(!maponly)
             {
-                response = {{ response | safe}};
-                console.log(response);
-                //renderRoute();
+                bus = {{ bus | safe}};
+                console.log(bus);
+                renderRoute();
             }
         }
 
         function renderRoute()
         {
             console.log("place marker");
+            route = []
+            originLoc = new google.maps.LatLng(bus['route'][0][0], bus['route'][0][1]);
+            destinLoc = new google.maps.LatLng(bus['route'][1][0], bus['route'][1][1]);
+            legs = bus['route'];
 
-            for(place in response['locations'])
+
+            console.log(legs.length);
+            for(i = 2; i < legs.length; i++)
             {
-                placeMarker(response['locations'][place][0].geometry.location);
+                route.push({location: new google.maps.LatLng(legs[i][0], legs[i][1]),
+                            stopover: true
+                            });
+
+                console.log(new google.maps.LatLng(legs[i][0], legs[i][1]))
             }
-
-            //for(i = 0; i < response['directions'][0]['legs'][0]['steps'].length; i++)
-            //{
-              //  placeMarker(response['directions'][0]['legs'][0]['steps'][i]['end_location']);
-            //}
-
+            console.log(route);
             dirserv = new google.maps.DirectionsService();
             dirDisplay = new google.maps.DirectionsRenderer();
             dirDisplay.setMap(map);
 
-            console.log(response['directions'][0]['legs'][0]['steps'][0]);
+            //console.log(response['directions'][0]['legs'][0]['steps'][0]);
 
-            originLoc = new google.maps.LatLng( response['locations']['origin'][0]['geometry']['location']['lat'],
-                                                response['locations']['origin'][0]['geometry']['location']['lng']);
-            destinLoc = new google.maps.LatLng( response['locations']['destination'][0]['geometry']['location']['lat'],
-                                                response['locations']['destination'][0]['geometry']['location']['lng']);
+            //originLoc = new google.maps.LatLng( response['locations']['origin'][0]['geometry']['location']['lat'],
+            //                                    response['locations']['origin'][0]['geometry']['location']['lng']);
+            //destinLoc = new google.maps.LatLng( response['locations']['destination'][0]['geometry']['location']['lat'],
+            //                                    response['locations']['destination'][0]['geometry']['location']['lng']);
+
             var request = {
                 origin: originLoc,
                 destination: destinLoc,
                 durationInTraffic: true,
-                //waypoints: midpoints,
+                waypoints: route,
                 optimizeWaypoints: true,
                 travelMode: google.maps.TravelMode.DRIVING
             };
