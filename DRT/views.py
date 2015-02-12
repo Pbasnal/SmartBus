@@ -11,7 +11,7 @@ buses = Buses()
 def showMap(request):
     args = {'showonlymap': 'true'}
     args.update(csrf(request))
-    args['bus'] = 'true'
+    args['res'] = 'true'
     return render_to_response("map.html", args)
 
 def setPath(request):
@@ -22,16 +22,16 @@ def setPath(request):
     res = Gmap.findRouteWithoutBus()
     '''
 
-    bus = buses.getBus(request.POST['origin'], request.POST['destination'])
+    res = buses.getBus(request.POST['origin'], request.POST['destination'])
     args = {}
 
-    if not bus:
+    if not res:
         args = {'showonlymap': 'true'}
         args.update(csrf(request))
         args['response'] = 'true'
         return render_to_response("map.html", args)
 
-    args['bus'] = bus.to_JSON()
+    args['res'] = res.to_JSON()
     args['showonlymap'] = 'false'
 
     return render_to_response("map.html", args)

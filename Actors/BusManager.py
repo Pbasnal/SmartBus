@@ -3,6 +3,7 @@ __author__ = 'basnal'
 
 #from Actors.models import BusModel
 from Actors.Bus import Bus
+from Actors.Response import DRTResponse
 
 import pprint
 
@@ -12,6 +13,8 @@ class Buses:
     AcceptingBusList = []
 
     pp = pprint.PrettyPrinter()
+
+    drtResponse = DRTResponse()
 
     def getBus(self, pickup, dropoff):
         # this function returns the most appropriate bus to pick up a customer
@@ -33,7 +36,12 @@ class Buses:
         print("\n\nSelected Bus >>\n")
         self.pp.pprint(self.AcceptingBusList[0].route)
 
-        return self.AcceptingBusList[0]
+        self.drtResponse.responseOfBus(self.AcceptingBusList[0])
+
+        #print "\n\n>>>> response in json"
+        #self.pp.pprint(self.drtResponse.to_JSON())
+
+        return self.drtResponse
 
 
 

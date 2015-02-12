@@ -58,8 +58,8 @@
 
             if(!maponly)
             {
-                bus = {{ bus | safe}};
-                console.log(bus);
+                res = {{ res | safe}};
+                console.log(res);
                 renderRoute();
             }
         }
@@ -67,32 +67,26 @@
         function renderRoute()
         {
             console.log("place marker");
+            console.log(res.Origin);
             route = []
-            originLoc = new google.maps.LatLng(bus['route'][0][0], bus['route'][0][1]);
-            destinLoc = new google.maps.LatLng(bus['route'][1][0], bus['route'][1][1]);
-            legs = bus['route'];
+            originLoc = new google.maps.LatLng(res.Origin['lat'], res.Origin['lng']);
+            destinLoc = new google.maps.LatLng(res.Destination['lat'], res.Destination['lng']);
 
+            legs = res.Waypoints.way;
 
             console.log(legs.length);
-            for(i = 2; i < legs.length; i++)
-            {
-                route.push({location: new google.maps.LatLng(legs[i][0], legs[i][1]),
-                            stopover: true
-                            });
+            for(i = 0; i < legs.length; i++) {
+                route.push({
+                    location: new google.maps.LatLng(legs[i]['location']['lat'], legs[i]['location']['lng']),
+                    stopover: true
+                });
 
                 console.log(new google.maps.LatLng(legs[i][0], legs[i][1]))
             }
-            console.log(route);
+
             dirserv = new google.maps.DirectionsService();
             dirDisplay = new google.maps.DirectionsRenderer();
             dirDisplay.setMap(map);
-
-            //console.log(response['directions'][0]['legs'][0]['steps'][0]);
-
-            //originLoc = new google.maps.LatLng( response['locations']['origin'][0]['geometry']['location']['lat'],
-            //                                    response['locations']['origin'][0]['geometry']['location']['lng']);
-            //destinLoc = new google.maps.LatLng( response['locations']['destination'][0]['geometry']['location']['lat'],
-            //                                    response['locations']['destination'][0]['geometry']['location']['lng']);
 
             var request = {
                 origin: originLoc,
@@ -103,13 +97,17 @@
                 travelMode: google.maps.TravelMode.DRIVING
             };
 
+
             dirserv.route(request, function(response, status)
             {
+                console.log("response");
+                console.log(response);
                 if(status == google.maps.DirectionsStatus.OK)
                 {
                     dirDisplay.setDirections(response);
                 }
             });
+            console.log("request formed");
         }
 
         function placeMarker(place)
@@ -124,4 +122,5 @@
     </script>
 </body>
 </html>
+
 

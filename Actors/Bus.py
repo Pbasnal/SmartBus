@@ -10,7 +10,7 @@ import json
 class Bus:
     origin = [18.6183, 73.8768]  # 'army institute of technology, pune'
     destination = [18.6183, 73.8768]  # 'baner, pune'
-    route = [[18.6183, 73.8768], [18.6183, 73.8768]]  # [{'lat': 18.5726, 'lng': 73.8782}, {'lat': 18.5604, 'lng': 73.8360}]    #wadi and bhosari
+    route = []  # [{'lat': 18.5726, 'lng': 73.8782}, {'lat': 18.5604, 'lng': 73.8360}]    #wadi and bhosari
     NewRoute = []
     Duration = 00
     Distance = 00
@@ -39,6 +39,9 @@ class Bus:
 
         self.directions = self.Gmap.findRouteofBus(self)
 
+        #print "\n\nDirections returned by GMap legs"
+        #self.pp.pprint(self.directions)
+
         self.fillTimeTable(self.directions[0]['legs'])
 
         print "searching for >>> "
@@ -50,6 +53,10 @@ class Bus:
         t2 = [item for item in self.TimeTable if
               round(item["location"]["lat"], 4) == round(self.NewCustomer.DropOff[0], 4)
               and round(item["location"]["lng"], 4) == round(self.NewCustomer.DropOff[1], 4)]
+
+        if not t1 or not t2:
+            print "\n\n>>>No time returned"
+            return False
 
         self.pp.pprint("Pickup loc :")
         self.pp.pprint(t1)
@@ -84,7 +91,7 @@ class Bus:
         return True
 
     def createNewRoute(self):
-        self.NewRoute = self.route
+        self.NewRoute = list(self.route)
         self.NewRoute.append(self.NewCustomer.pickup())
         self.NewRoute.append(self.NewCustomer.dropoff())
 
@@ -104,7 +111,7 @@ class Bus:
                           sort_keys=True, indent=4)
 
     def confirm(self):
-        self.route = self.NewRoute
+        self.route = list(self.NewRoute)
         self.Customers.append(self.NewCustomer)
 
 

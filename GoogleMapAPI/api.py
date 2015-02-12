@@ -31,44 +31,23 @@ class GMap:
         return [res[0]['geometry']['location']['lat'], res[0]['geometry']['location']['lng']]
 
     def findRouteofBus(self, bus):
-        #self.PickUpGeocode = self.MapService.geocode(self.PickUp)
-        #self.DropOffGeocode = self.MapService.geocode(self.DropOff)
-
-        #print self.PickUpGeocode[0]['geometry']['location']
 
         # The directions must be calculated with midways
         print bus.origin
         print bus.destination
+        print "\n\nBus Route>>>"
+        self.pp.pprint(bus.route)
+        print "\n\n"
+
         self.directions = self.MapService.directions(bus.origin, bus.destination,
-                                                     waypoints=bus.route,
+                                                     waypoints=bus.NewRoute,
                                                      mode='driving',
                                                      optimize_waypoints=True)
 
         # for total time self.directions[0]['legs'][0]['duration']
-
         #self.pp.pprint(self.directions)
 
         return self.directions
-
-        """
-        self.time.formatToTime(self.TimeDistanceOfTravel(self.directions[0]['legs'])[0])
-        self.time.printTime()
-        #self.pp.pprint(self.directions[0]['legs'])
-
-        print self.time.TotalMinutes
-        print bus.Tmax
-
-        # Main DRT algorithm
-        bus.printBus()
-        Hubs, bus = self.drtAlgo(bus)
-
-        print "\n\nafter algo"
-        bus.printBus()
-
-        return {'locations': {'origin': self.PickUpGeocode,
-                              'destination': self.DropOffGeocode},
-                'bus': bus}
-        """
 
     def findRouteWithoutBus(self):
         if not self.PickUp or not self.DropOff:
