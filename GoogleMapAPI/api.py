@@ -19,11 +19,19 @@ class GMap:
         self.directions = self.MapService.directions(origin, destination,
                                                      mode=mode)
 
-        #print ">>>>>>>>>> Directions"
-        #self.pp.pprint(self.directions[0]['legs'][0])
+
+        '''
+        print "\n\nDirections api.py : 24 \n"
+        self.pp.pprint(origin)
+        self.pp.pprint(destination)
+        self.pp.pprint(self.directions)
+        print "\n\n"
+        '''
+
         return self.directions[0]['legs'][0]
 
     def getGeocodeFor(self, location):
+        # converts an address to geological coordinates
         res = self.MapService.geocode(location)
         self.pp.pprint(res[0]['formatted_address'])
         self.pp.pprint(res[0]['geometry']['location'])
@@ -67,3 +75,7 @@ class GMap:
         return {'locations': {'origin': self.PickUpGeocode,
                               'destination': self.DropOffGeocode},
                 'directions': self.directions}
+
+    def getDistanceAndTimeFromBus(self, bus, location):
+        # gets distance of the bus from the requested location
+        return self.MapService.distance_matrix(bus.CurrentLocation, location)

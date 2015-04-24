@@ -21,8 +21,11 @@ def setPath(request):
 
     res = Gmap.findRouteWithoutBus()
     '''
-
+    #print "This is what i have got :-> ", request.POST
     res = buses.getBus(request.POST['origin'], request.POST['destination'])
+    if res.Status == "Route not found":
+        res = None
+
     args = {}
 
     if not res:
@@ -33,5 +36,7 @@ def setPath(request):
 
     args['res'] = res.to_JSON()
     args['showonlymap'] = 'false'
+
+    print "\n\nBus route >>> ", res.Waypoints
 
     return render_to_response("map.html", args)

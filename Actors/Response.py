@@ -15,6 +15,10 @@ class DRTResponse:
     pp = pprint.PrettyPrinter()
 
     def responseOfBus(self, bus):
+        if bus == None:
+            self.Status = "Route not found"
+            return
+
         self.Origin = {'lat': bus.origin[0],
                        'lng': bus.origin[1]}
         self.Destination = {'lat': bus.destination[0],

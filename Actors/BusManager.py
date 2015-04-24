@@ -9,7 +9,7 @@ import pprint
 
 # Class Buses maintains the list of buses used during the processing
 class Buses:
-    BusList = []
+    BusList = [Bus()]
     AcceptingBusList = []
 
     pp = pprint.PrettyPrinter()
@@ -24,24 +24,47 @@ class Buses:
         # and in another phase also consider near destination
         # self.BusList = BusModel.objects.all()
         # for now we use only one bus
-        self.BusList.append(Bus())
+        # self.BusList.append()
 
-        for bus in self.BusList:
+        NearByBuses = self.nearByBuses(pickup, dropoff)
+
+        for bus in NearByBuses:
             if bus.accept(pickup, dropoff):
                 self.AcceptingBusList.append(bus)
                 break
 
-        self.AcceptingBusList[0].confirm()
+        print "The accepting bus list :->\n"
+        self.pp.pprint(self.AcceptingBusList)
+        print "\n\n\n"
 
-        print("\n\nSelected Bus >>\n")
-        self.pp.pprint(self.AcceptingBusList[0].route)
+        if self.AcceptingBusList.__len__() != 0:
+            self.AcceptingBusList[0].confirm()
 
-        self.drtResponse.responseOfBus(self.AcceptingBusList[0])
+            print("\n\nSelected Bus >>\n")
+            self.pp.pprint(self.AcceptingBusList[0].route)
+
+            self.drtResponse.responseOfBus(self.AcceptingBusList[0])
 
         #print "\n\n>>>> response in json"
         #self.pp.pprint(self.drtResponse.to_JSON())
 
+
         return self.drtResponse
+
+    def nearByBuses(self, pickup, dropoff):
+
+        nearByBusList = []
+
+        for bus in self.BusList:
+            res = bus.getDistanceAndTimeFrom(pickup)
+            '''
+            print "\n\n\nDistance and time response : \n"
+            self.pp.pprint(res['rows'][0]['elements'][0])
+            print "\n\n\n"
+            '''
+            if res != None and res['rows'][0]['elements'][0]['duration']['value'] <= 900:
+                nearByBusList.append(bus)
+        return nearByBusList
 
 
 

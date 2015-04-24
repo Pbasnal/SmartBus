@@ -5,15 +5,17 @@ from GoogleMapAPI.api import GMap
 
 import pprint
 import json
+import math
 
 
 class Bus:
-    origin = [18.6183, 73.8768]  # 'army institute of technology, pune'
-    destination = [18.6183, 73.8768]  # 'baner, pune'
+    origin = (18.6183, 73.8768)  # 'army institute of technology, pune'
+    destination = (18.6183, 73.8768)  # 'baner, pune'
     route = []  # [{'lat': 18.5726, 'lng': 73.8782}, {'lat': 18.5604, 'lng': 73.8360}]    #wadi and bhosari
     NewRoute = []
     Duration = 00
     Distance = 00
+    CurrentLocation = origin
 
     pp = pprint.PrettyPrinter()
 
@@ -44,15 +46,20 @@ class Bus:
 
         self.fillTimeTable(self.directions[0]['legs'])
 
-        print "searching for >>> "
-        self.pp.pprint(self.NewCustomer.PickUp)
+        print "searching for >>> ", math.hypot(self.NewCustomer.PickUp[0] - self.TimeTable[0]["location"]["lat"],
+                                               self.NewCustomer.PickUp[1] - self.TimeTable[0]["location"]["lng"])
+        #self.pp.pprint(self.NewCustomer.PickUp)
+
+
+        print "\n\nPick up location :", math.hypot(self.NewCustomer.PickUp[0] - self.TimeTable[0]["location"]["lat"],
+                                self.NewCustomer.PickUp[1] - self.TimeTable[0]["location"]["lng"]), "\n\n"
 
         t1 = [item for item in self.TimeTable if
-              round(item["location"]["lat"], 4) == round(self.NewCustomer.PickUp[0], 4)
-              and round(item["location"]["lng"], 4) == round(self.NewCustomer.PickUp[1], 4)]
+                        math.hypot(self.NewCustomer.PickUp[0] - item["location"]["lat"],
+                                self.NewCustomer.PickUp[1] - item["location"]["lng"]) <= 0.1]
         t2 = [item for item in self.TimeTable if
-              round(item["location"]["lat"], 4) == round(self.NewCustomer.DropOff[0], 4)
-              and round(item["location"]["lng"], 4) == round(self.NewCustomer.DropOff[1], 4)]
+                        math.hypot(self.NewCustomer.DropOff[0] - item["location"]["lat"],
+                                self.NewCustomer.DropOff[1] - item["location"]["lng"]) <= 0.1]
 
         if not t1 or not t2:
             print "\n\n>>>No time returned"
@@ -92,8 +99,25 @@ class Bus:
 
     def createNewRoute(self):
         self.NewRoute = list(self.route)
-        self.NewRoute.append(self.NewCustomer.pickup())
-        self.NewRoute.append(self.NewCustomer.dropoff())
+
+        i = 0
+        PickupIndex = -1
+        DropoffIndex = -1
+
+        for loc in self.NewRoute:
+            if math.hypot(self.NewCustomer.PickUp[0] - loc[0], self.NewCustomer.PickUp[1] - loc[1] < 0.5):
+                PickupIndex = i
+            if math.hypot(self.NewCustomer.PickUp[0] - loc[0], self.NewCustomer.PickUp[1] - loc[1] < 0.5):
+                DropoffIndex = i
+
+            i += 1
+
+
+
+        if not self.NewRoute.__contains__(self.NewCustomer.pickup()):
+            self.NewRoute.append(self.NewCustomer.pickup())
+        if not self.NewRoute.__contains__(self.NewCustomer.dropoff()):
+            self.NewRoute.append(self.NewCustomer.dropoff())
 
     def fillTimeTable(self, stops):
         print ">>>> Stops"
@@ -114,8 +138,8 @@ class Bus:
         self.route = list(self.NewRoute)
         self.Customers.append(self.NewCustomer)
 
-
-
+    def getDistanceAndTimeFrom(self, loc):
+        return self.Gmap.getDistanceAndTimeFromBus(self, loc)
 
 
 
