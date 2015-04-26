@@ -38,9 +38,15 @@ MIDDLEWARE_CLASSES = ('django.contrib.sessions.middleware.SessionMiddleware',
 ROOT_URLCONF = 'SmartBus.urls'
 WSGI_APPLICATION = 'SmartBus.wsgi.application'
 
-DATABASES = {'default': {   'ENGINE': 'django.db.backends.sqlite3',
-                            'NAME': os.path.join(BASE_DIR, 'db.sqlite3')}
-            }
+DATABASES = {
+    'default': {   'ENGINE': 'django.db.backends.sqlite3',
+                    'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
+    },
+    'mongo' : {
+      'ENGINE' : 'django_mongodb_engine',
+      'NAME' : 'drtdb'
+   }
+}
 
 NEO4J_DATABASES = {
     'default' : {
